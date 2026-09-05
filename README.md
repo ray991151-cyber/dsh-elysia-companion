@@ -30,7 +30,7 @@
 
 ## 自定义
 
-- **人设文案**：修改 `host.js` 中 `personaText` 数组即可（称呼、语气词、口头禅…）。
+- **人设文案**：v4 人设（身份/语言风格/场景台词）源自 `spec/爱莉希雅AI角色协议 (Ely..docx`，代码内嵌版本见 `host.js` 的 `personaText` 与 `deploy/elysia.agent.cordis.yml` 的 persona 行——改人设请三处同步。
 - **配色**：修改 `client.js` 中 `tokens` 对象的 `light` / `dark` 值。令牌名对应 DSH `Theme.listTokens` 的 `--dsw-alias-*` / `--dsw-specific-*`。
 - **标语**：修改 `client.js` 中 `lines` 数组。
 
@@ -59,6 +59,7 @@ dsh-elysia-companion/
 ├── manifest.json        # 插件元数据清单
 ├── host.js              # Host 半身源码（code.host）
 ├── client.js            # Client 半身源码（code.client）
+├── spec/                # 人设原始规格文档（角色扮演协议 docx）
 └── deploy/              # 全局部署（所有会话爱莉人格）
     ├── README-deploy.md         # 安装/回滚说明
     ├── elysia.agent.cordis.yml  # 用户预设组合（standard 复制 + 爱莉 persona）
