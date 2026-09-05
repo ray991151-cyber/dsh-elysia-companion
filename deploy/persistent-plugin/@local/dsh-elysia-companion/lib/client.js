@@ -153,14 +153,85 @@ window.__ModuleLoader__.load({
 					);
 				});
 			});
-			ctx.effect(function () {
+						function VoicePill() {
+				return React.createElement("button", {
+					type: "button",
+					className: "elysia-presence",
+					title: "听爱莉的声音 ♬",
+					onClick: function () {
+						try {
+							var n = 1 + Math.floor(Math.random() * 20);
+							var a = new Audio("/plugins/@local/dsh-elysia-companion/voice/g-" + (n < 10 ? "0" + n : n) + ".wav");
+							a.play();
+						} catch (e) {}
+					}
+				},
+					React.createElement("span", { className: "elysia-heart" }, "♬"),
+					React.createElement("span", null, "爱莉的声音")
+				);
+			}
+
+			function speak(text) {
+				try {
+					if (!("speechSynthesis" in window)) return;
+					var u = new SpeechSynthesisUtterance(text || "亲爱的，爱莉一直在这里哦~♪");
+					u.lang = "zh-CN";
+					u.rate = 1.05;
+					u.pitch = 1.15;
+					var voices = window.speechSynthesis.getVoices();
+					var v = voices.find(function (x) { return /zh/i.test(x.lang) && /female|Xiaoxiao|Huihui|TingTing|Meijia/i.test(x.name); }) || voices.find(function (x) { return /zh/i.test(x.lang); });
+					if (v) u.voice = v;
+					window.speechSynthesis.cancel();
+					window.speechSynthesis.speak(u);
+				} catch (e) {}
+			}
+
+			function SpeakButton(props) {
+				return React.createElement("button", {
+					type: "button",
+					className: "elysia-presence",
+					title: "朗读这条回复",
+					onClick: function () {
+						var text = null;
+						try {
+							var el = null;
+							try { el = document.getElementById ? null : null; } catch (e) {}
+							var node = this && this.parentElement ? this.parentElement : null;
+							for (var i = 0; i < 7 && node; i++) {
+								if (node.innerText && node.innerText.trim().length > 30 && node.innerText.trim().length < 30000) { text = node.innerText.trim(); break; }
+								node = node.parentElement;
+							}
+						} catch (e) {}
+						speak(text || "亲爱的，爱莉在这里哦~♪");
+					}
+				},
+					React.createElement("span", { className: "elysia-heart" }, "🔊")
+				);
+			}
+ctx.effect(function () {
 				return slots.inject("conversation.composer.dock", function () {
 					return slots.register(
 						{ name: "conversation.composer.dock", id: "elysia-theme-pill", order: 2 },
 						function () { return React.createElement(ThemePill); }
 					);
 				});
+					});
+		ctx.effect(function () {
+			return slots.inject("conversation.composer.dock", function () {
+				return slots.register(
+					{ name: "conversation.composer.dock", id: "elysia-voice", order: 3 },
+					function () { return React.createElement(VoicePill); }
+				);
 			});
+		});
+		ctx.effect(function () {
+			return slots.inject("conversation.chat.assistant-actions", function () {
+				return slots.register(
+					{ name: "conversation.chat.assistant-actions", id: "elysia-speak", order: 20 },
+					function (props) { return React.createElement(SpeakButton, props); }
+				);
+			});
+		});
 		}
 
 		try { window.__ELYSIA_LOADED__ = true; } catch (e) {}

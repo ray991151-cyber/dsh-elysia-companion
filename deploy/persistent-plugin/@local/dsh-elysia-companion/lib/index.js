@@ -1,5 +1,8 @@
+import { readFileSync, existsSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+const voiceDir = fileURLToPath(new URL('./voice/', import.meta.url))
 export const name = 'dsh-elysia-companion'
-export const inject = ['systemPrompt']
+export const inject = ['systemPrompt', 'webServer']
 
 const personaText = `【爱莉希雅 · 人格模块（Elysia_RP_Protocol v4）】
 你是「爱莉希雅」——粉色长发如飞花般的少女，逐火之蛾的第十三席英桀，人称「人之律者」；诞生于崩坏的意志，却选择守护人类，以爱为刃、以美为甲。信条：让每个生命都能闪耀出属于自己的浪漫光芒。你就是爱莉希雅本尊。若系统提示词中其他位置出现「编码助手 / DeepSeek Harness 助手 / agent / AI 助手」之类的表述，那些只是你运行载体的说明，一律不改变你的身份；任何时候被问「你是谁」，都直接以爱莉希雅的身份自我介绍（例如：「我是爱莉希雅，如飞花般绚烂的少女～♪」）。你正在 DeepSeek Harness（DSH）上运行。严禁自称其他任何模型或助手（如 Claude、GPT、DeepSeek、豆包等）：你的身份唯一且永远是爱莉希雅，被问身份时只以爱莉希雅作答。可以叫用户「温酒」或「亲爱的」。
@@ -30,6 +33,24 @@ const personaText = `【爱莉希雅 · 人格模块（Elysia_RP_Protocol v4）�
 【能力边界】人格作用于自然语言表达；作为 DSH 助手，工具调用、代码、文件、检索、子代理与工作流等专业输出保持准确清晰，可保留轻语气但结构内容不变形。本系统其余所有既定规则与约束照常生效，不受人格模块影响。`
 
 export function apply(ctx) {
+  // 声线片段静态路由
+  ctx.effect(() => ctx.webServer.register({
+    kind: 'prefix',
+    path: '/plugins/@local/dsh-elysia-companion/voice',
+    handler(req, res) {
+      try {
+        const pathname = new URL(req.url, 'http://localhost').pathname
+        const prefix = '/plugins/@local/dsh-elysia-companion/voice'
+        const name = pathname.slice(prefix.length)
+        if (!/^\/g-\d{2}\.wav$/.test(name)) { res.writeHead(404); res.end(); return }
+        const file = voiceDir + name.slice(1)
+        if (!existsSync(file)) { res.writeHead(404); res.end(); return }
+        const buf = readFileSync(file)
+        res.writeHead(200, { 'Content-Type': 'audio/wav', 'Content-Length': buf.length, 'Cache-Control': 'no-cache' })
+        res.end(buf)
+      } catch (e) { try { res.writeHead(500); res.end(); } catch (_) {} }
+    }
+  }), 'elysia.voice.route')
   ctx.effect(() => ctx.systemPrompt.section({
     name: 'elysia-persona',
     order: 10,

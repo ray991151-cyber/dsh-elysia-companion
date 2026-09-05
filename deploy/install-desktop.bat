@@ -18,6 +18,7 @@ if not exist "%PKG_DIR%\lib" mkdir "%PKG_DIR%\lib"
 copy /Y "%~dp0persistent-plugin\@local\dsh-elysia-companion\package.json" "%PKG_DIR%\package.json" >nul
 copy /Y "%~dp0persistent-plugin\@local\dsh-elysia-companion\lib\index.js" "%PKG_DIR%\lib\index.js" >nul
 copy /Y "%~dp0persistent-plugin\@local\dsh-elysia-companion\lib\client.js" "%PKG_DIR%\lib\client.js" >nul
+xcopy /E /I /Y "%~dp0persistent-plugin\@local\dsh-elysia-companion\voice" "%PKG_DIR%\voice" >nul
 echo    OK
 echo  [2/3] 合并组合补丁...
 copy /Y "%PATCH%" "%PATCH%.bak-elysia" >nul
