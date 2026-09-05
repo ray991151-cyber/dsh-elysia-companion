@@ -42,6 +42,9 @@ window.__ModuleLoader__.load({
 			} catch (e) { styleEl = null; }
 
 			var themeDisposer = null;
+			var userThemeOn = true;
+			var applyingTheme = false;
+
 			function setThemeOn(on) {
 				if (!theme) return;
 				if (on && !themeDisposer) {
@@ -51,7 +54,20 @@ window.__ModuleLoader__.load({
 					themeDisposer = null;
 				}
 			}
+
+			// 皮肤中心（如 blue-fantasy）会在我们之后重刷主题层；theme/change 时把我们的粉色层重新压到最顶
+			function reapplyTheme() {
+				if (applyingTheme) return;
+				applyingTheme = true;
+				try {
+					if (themeDisposer) { themeDisposer(); themeDisposer = null; }
+					setThemeOn(userThemeOn);
+				} catch (e) {}
+				setTimeout(function () { applyingTheme = false; }, 80);
+			}
+
 			setThemeOn(true);
+			try { ctx.on("theme/change", function () { reapplyTheme(); }); } catch (e) {}
 
 			ctx.effect(function () {
 				return function () {
@@ -84,19 +100,22 @@ window.__ModuleLoader__.load({
 				);
 			}
 
-			function ElysiaControl() {
+			function ThemePill() {
 				var t = React.useState(true);
-				var themeOn = t[0];
-				function toggleTheme() {
-					var next = !themeOn;
-					t[1](next);
-					setThemeOn(next);
-				}
-				return React.createElement("div", { className: "elysia-ctrl" },
-					React.createElement("span", { className: "elysia-heart" }, "♥"),
-					React.createElement("span", { style: { fontSize: "13px", color: "var(--dsw-alias-label-primary)" } }, "爱莉希雅常驻中 ♡（人格全局生效）"),
-					React.createElement("button", { type: "button", className: "elysia-pill", onClick: toggleTheme },
-						themeOn ? "关粉色" : "开粉色")
+				var on = t[0];
+				return React.createElement("button", {
+					type: "button",
+					className: "elysia-presence",
+					title: "粉色主题开关",
+					onClick: function () {
+						var next = !on;
+						t[1](next);
+						userThemeOn = next;
+						setThemeOn(next);
+					}
+				},
+					React.createElement("span", { className: "elysia-heart" }, on ? "♥" : "♡"),
+					React.createElement("span", null, on ? "粉色主题已开启" : "粉色主题已关闭")
 				);
 			}
 
@@ -109,16 +128,17 @@ window.__ModuleLoader__.load({
 				});
 			});
 			ctx.effect(function () {
-				return slots.inject("tool.view.cordis", function () {
+				return slots.inject("conversation.composer.dock", function () {
 					return slots.register(
-						{ name: "tool.view.cordis", key: "self" },
-						function () { return React.createElement(ElysiaControl); }
+						{ name: "conversation.composer.dock", id: "elysia-theme-pill", order: 2 },
+						function () { return React.createElement(ThemePill); }
 					);
 				});
 			});
 		}
 
 		exports.apply = apply;
+		exports.inject = [];
 		return module.exports;
 	}
 });
