@@ -1,0 +1,20 @@
+{
+  "name": "爱莉希雅 · Elysia Companion",
+  "purpose": "让 DSH 以爱莉希雅的人格对话，并换上粉色系主题，附带可爱的陪伴 UI。",
+  "type": "dynamic-cordis-plugin",
+  "hostPlatform": "host",
+  "clientPlatform": "client",
+  "files": {
+    "code.host": "host.js",
+    "code.client": "client.js"
+  },
+  "hostServices": ["systemPrompt"],
+  "clientServices": ["theme", "slots"],
+  "clientBuiltins": ["React", "styles", "host"],
+  "hostBuiltins": ["harness"],
+  "slots": {
+    "conversation.composer.dock": "id=elysia-presence",
+    "tool.view.cordis": "key=self"
+  },
+  "themeSource": "elysia-pink"
+}
