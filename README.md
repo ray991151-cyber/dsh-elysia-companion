@@ -36,20 +36,19 @@
 
 改完源码后，用插件「更新」流程重新定义/运行即可生效（旧版本保留，可回滚）。
 
-## 全局部署：让「所有会话」都以爱莉人格回复
+## 全局部署：让「所有会话」都以爱莉人格回复（重启不丢）
 
 动态插件的人设区块是**会话级（scope）**的——只影响运行着该插件的会话，进程重启即失效。
-要让本机 DSH 的**每一个新会话**都以爱莉人格回复，需要把人格放进「会话预设」：
+要让 DSH 的**每一个会话、每次重启后**都以爱莉人格回复，推荐**常驻插件包**方案：
 
-1. 基于官方 `standard` 预设复制一个用户预设，把 persona 行替换为爱莉希雅人设
-   （现成文件见 `deploy/`，复制到 `~/.dsh/.agent-presets/elysia/`）。
-2. 在 profile 补丁 `profiles/<profile>/cordis.patch.yml` 中把默认预设改为 `elysia`
-   （见 `deploy/README-deploy.md`，含回滚方法）。
-3. 完全重启 DSH 后，新会话即默认以爱莉人格对话；设置 → 预设 里也可切换/设为默认。
+1. 复制 `deploy/persistent-plugin/@local/dsh-elysia-companion/` 到真实主目录的
+   `profiles/node_modules/@local/`（桌面版 DSH_HOME 在 `%APPDATA%\open-deepseek-harness-desktop\dsh-home`，**不是** `~/.dsh`！）。
+2. 在真实主目录 `profiles/web/cordis.patch.yml` 末尾追加 insert 行（见 `deploy/README-persistent.md`）。
+3. 完全重启 DSH。host 半身注册**全局**人格 section（所有会话生效）；
+   client 半身提供粉色主题与 Dock 陪伴 UI。
 
-> 原理：DSH 的系统提示词分「全局部署人格」与「会话预设人格」两层，预设的 persona 行会遮蔽
-> 全局层，因此必须作用于预设层才能覆盖每个会话。动态插件（本仓库主件）适合单会话试用；
-> 全局常驻请用上面的预设方案。
+> 原理：动态插件仅存于进程内存；常驻能力必须落进组合 loader 行。全局人格用独立 section 名
+> （`elysia-persona`）挂在 host 层，不被预设 persona 行的遮蔽规则影响。
 
 ## 仓库结构
 
@@ -60,10 +59,13 @@ dsh-elysia-companion/
 ├── host.js              # Host 半身源码（code.host）
 ├── client.js            # Client 半身源码（code.client）
 ├── spec/                # 人设原始规格文档（角色扮演协议 docx）
-└── deploy/              # 全局部署（所有会话爱莉人格）
-    ├── README-deploy.md         # 安装/回滚说明
-    ├── elysia.agent.cordis.yml  # 用户预设组合（standard 复制 + 爱莉 persona）
-    └── elysia.preset.yml        # 预设元数据（名称/描述/排序）
+└── deploy/              # 部署方案
+    ├── README-persistent.md    # 常驻插件包方案（推荐，含 DSH_HOME 踩坑与回滚）
+    ├── persistent-plugin/
+    │   └── @local/dsh-elysia-companion/   # 常驻插件包源码（package.json + lib/）
+    ├── README-deploy.md        # （旧）会话预设方案说明（已弃用）
+    ├── elysia.agent.cordis.yml # （旧）预设组合存档
+    └── elysia.preset.yml       # （旧）预设元数据存档
 ```
 
 ## 声明

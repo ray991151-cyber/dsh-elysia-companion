@@ -1,0 +1,19 @@
+{
+  "name": "@local/dsh-elysia-companion",
+  "version": "1.0.0",
+  "description": "爱莉希雅常驻插件：全局人格（host）+ 粉色主题与陪伴 UI（client）。本地安装于 $DSH_HOME/profiles/node_modules。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web",
+      "inject": [],
+      "immediately": true
+    }
+  }
+}
