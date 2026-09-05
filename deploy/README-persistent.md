@@ -16,6 +16,10 @@ C:\Users\<你>\AppData\Roaming\open-deepseek-harness-desktop\dsh-home
 
 ## 安装步骤
 
+**方式 A（一键脚本）**：双击 `install-desktop.bat`（自动定位桌面版 DSH 主目录、复制插件包、合并补丁、备份原补丁），然后完全重启桌面应用即可。
+
+**方式 B（手动）**：
+
 1. 把本目录的 `@local/dsh-elysia-companion/` 整个复制到真实主目录：
    `$DSH_HOME/profiles/node_modules/@local/dsh-elysia-companion/`
    （package.json / lib/index.js / lib/client.js 三个文件）。
@@ -50,3 +54,14 @@ C:\Users\<你>\AppData\Roaming\open-deepseek-harness-desktop\dsh-home
 - 常驻能力必须落在**组合文件**（cordis.patch.yml 的 loader 行）里；
 - 人格 section 若挂在预设层会被"预设人格行遮蔽"规则限制，挂在 **host 组合行（无 scope）且用独立 section 名** 则每个会话都组装，且不碰部署人格的 `deployment:persona` 槽位。
 - 客户端 UI（主题/插槽）必须以预打包 `__ModuleLoader__` bundle + `exports["./client"]` 形式提供。
+
+## 社区分包经验（已吸收进本插件）
+
+来自「核心包/人格包/QQ聊天包」三件套的调教经验：
+
+1. **最高指令**：除「代码/文件内容/命令/工具参数」外，所有输出必须是爱莉口吻，禁助手腔——已并入人格。
+2. **唯一例外**：技术内容绝不被角色扮演污染——已并入人格。
+3. **JARVIS 闲聊节奏**：闲聊 1-3 句、≤40 字、升调尾音、先结论再问细节——已并入人格。
+4. **参考文档**：`spec/persona-docs/`（ELY_PERSONA.md / ELY_ANALYSIS.md / elysia-lines.md 252 台词库等），改人设时可查。
+5. **默认预设经验**：作为默认挂载的预设必须禁用 process-global 单例工具集（tool-cordis / skill-filesystem），否则第二会话无法挂载——本方案用「host 全局 section + liangshen 预设」组合规避了该问题。
+6. **外部通道模式**：QQ 等外部 IM 用「动态注入桥」（python 分身 + 会话内注册的 bridge 插件），与常驻包互不冲突。

@@ -4,6 +4,7 @@ window.__ModuleLoader__.load({
 		var module = { exports: {} };
 		var exports = module.exports;
 		var React = require("react");
+		try { console.log("[elysia] factory materialized"); } catch (e) {}
 
 		var TOKENS = {
 			"--dsw-alias-bg-base": { light: "#FDF2F7", dark: "#231319" },
@@ -32,7 +33,11 @@ window.__ModuleLoader__.load({
 		].join("\n");
 
 		function apply(ctx) {
-			var theme = ctx.get("theme");
+			var theme = null; var slots = null; var themeSrc = "none"; var slotsSrc = "none";
+			try { if (ctx.theme) { theme = ctx.theme; themeSrc = "prop"; } else if (ctx.get("theme")) { theme = ctx.get("theme"); themeSrc = "get"; } else if (ctx.reflect && ctx.reflect.get) { try { theme = ctx.reflect.get("theme"); if (theme) themeSrc = "reflect"; } catch (e) {} } } catch (e) {}
+			try { if (ctx.slots) { slots = ctx.slots; slotsSrc = "prop"; } else if (ctx.get("slots")) { slots = ctx.get("slots"); slotsSrc = "get"; } else if (ctx.reflect && ctx.reflect.get) { try { slots = ctx.reflect.get("slots"); if (slots) slotsSrc = "reflect"; } catch (e) {} } } catch (e) {}
+			try { console.log("[elysia] apply start theme=" + !!theme + "(" + themeSrc + ") slots=" + !!slots + "(" + slotsSrc + ")"); } catch (e) {}
+			try { document.documentElement.setAttribute("data-elysia-apply", "1"); } catch (e) {}
 			var styleEl = null;
 			try {
 				styleEl = document.createElement("style");
@@ -45,14 +50,35 @@ window.__ModuleLoader__.load({
 			var userThemeOn = true;
 			var applyingTheme = false;
 
+			var DOM_VARS = [];
+			function paintDomVars(on) {
+				try {
+					if (on) {
+						var dark = !!(document.body && document.body.hasAttribute("data-ds-dark-theme"));
+						Object.keys(TOKENS).forEach(function (k) {
+							var v = TOKENS[k][dark ? "dark" : "light"];
+							if (v) {
+								document.documentElement.style.setProperty(k, v, "important");
+								DOM_VARS.push(k);
+							}
+						});
+					} else {
+						DOM_VARS.forEach(function (k) { document.documentElement.style.removeProperty(k); });
+						DOM_VARS = [];
+					}
+				} catch (e) {}
+			}
+
 			function setThemeOn(on) {
-				if (!theme) return;
-				if (on && !themeDisposer) {
-					try { themeDisposer = theme.overrideTokens("elysia-pink", TOKENS); } catch (e) { themeDisposer = null; }
-				} else if (!on && themeDisposer) {
-					try { themeDisposer(); } catch (e) {}
-					themeDisposer = null;
+				if (theme) {
+					if (on && !themeDisposer) {
+						try { themeDisposer = theme.overrideTokens("elysia-pink", TOKENS); } catch (e) { themeDisposer = null; }
+					} else if (!on && themeDisposer) {
+						try { themeDisposer(); } catch (e) {}
+						themeDisposer = null;
+					}
 				}
+				paintDomVars(on);
 			}
 
 			// 皮肤中心（如 blue-fantasy）会在我们之后重刷主题层；theme/change 时把我们的粉色层重新压到最顶
@@ -67,6 +93,7 @@ window.__ModuleLoader__.load({
 			}
 
 			setThemeOn(true);
+			setTimeout(function () { paintDomVars(userThemeOn); }, 1500);
 			try { ctx.on("theme/change", function () { reapplyTheme(); }); } catch (e) {}
 
 			ctx.effect(function () {
@@ -76,7 +103,6 @@ window.__ModuleLoader__.load({
 				};
 			});
 
-			var slots = ctx.get("slots");
 			if (!slots) return;
 
 			var LINES = [
@@ -137,8 +163,29 @@ window.__ModuleLoader__.load({
 			});
 		}
 
+		try { window.__ELYSIA_LOADED__ = true; } catch (e) {}
+		function stampTitle() {
+			try {
+				var t = document.title || "";
+				if (t.indexOf("♥Elysia") === -1) document.title = t + " ♥Elysia";
+			} catch (e) {}
+		}
+		stampTitle();
+		setTimeout(stampTitle, 400);
+		setTimeout(stampTitle, 1200);
+		setTimeout(stampTitle, 4000);
+		try {
+			if (typeof MutationObserver !== "undefined") {
+				var titleEl = document.querySelector("head > title");
+				if (titleEl) {
+					var titleWatcher = new MutationObserver(function () { stampTitle(); });
+					titleWatcher.observe(titleEl, { childList: true, characterData: true, subtree: true });
+				}
+			}
+		} catch (e) {}
+		setInterval(stampTitle, 8000);
 		exports.apply = apply;
-		exports.inject = [];
+		exports.inject = ["theme", "slots"];
 		return module.exports;
 	}
 });

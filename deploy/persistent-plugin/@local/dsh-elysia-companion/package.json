@@ -12,7 +12,7 @@
   "dsh": {
     "client": {
       "platform": "web",
-      "inject": [],
+      "inject": [ "@deepseek-ai/dsh-client-runtime", "@deepseek-ai/dsh-client-ui-theme" ],
       "immediately": true
     }
   }
